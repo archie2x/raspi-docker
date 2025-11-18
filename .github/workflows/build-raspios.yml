@@ -1,0 +1,97 @@
+name: Build Raspberry Pi OS Docker image
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-raspios:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    env:
+      IMAGE_NAME: raspios
+      IMAGE_TAG: trixie-arm64         # adjust naming if needed
+      RPIOS_URL: https://downloads.raspberrypi.com/raspios_lite_arm64_latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xz-utils fdisk kpartx e2fsprogs
+
+      - name: Download Raspberry Pi OS image
+        run: |
+          curl -L "$RPIOS_URL" -o raspios.img.xz
+          unxz raspios.img.xz
+
+      - name: Map partitions with kpartx
+        run: |
+          sudo kpartx -av raspios.img
+          # Find the second partition (rootfs)
+          ROOT_DEV=$(sudo kpartx -l raspios.img | awk 'NR==2 {print $1}')
+          echo "ROOT_DEV=$ROOT_DEV" | tee -a $GITHUB_ENV
+
+      - name: Mount rootfs
+        run: |
+          sudo mkdir -p /mnt/raspios-root
+          sudo mount /dev/mapper/$ROOT_DEV /mnt/raspios-root
+          ls /mnt/raspios-root
+
+      - name: Create rootfs tarball
+        run: |
+          cd /mnt/raspios-root
+          sudo tar --numeric-owner -cf /tmp/rootfs.tar --one-file-system .
+
+      - name: Unmount and cleanup loop devices
+        if: always()
+        run: |
+          sudo umount /mnt/raspios-root || true
+          sudo kpartx -dv raspios.img || true
+
+      - name: Prepare Docker build context
+        run: |
+          mkdir -p docker-context
+          sudo mv /tmp/rootfs.tar docker-context/rootfs.tar
+          cd docker-context
+          cat > Dockerfile << 'EOF'
+          FROM scratch
+          ADD rootfs.tar /
+          CMD ["/bin/bash"]
+          EOF
+
+      - name: Build and push Raspberry Pi OS base image (arm64)
+        run: |
+          cd docker-context
+
+          IMAGE_REF=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME:$IMAGE_TAG
+
+          docker buildx build \
+            --platform linux/arm64 \
+            -t "$IMAGE_REF" \
+            --push \
+            .
+
+          echo "Pushed $IMAGE_REF"
