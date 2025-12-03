@@ -91,6 +91,20 @@ jobs:
 
           echo "Detected Raspberry Pi OS $PRETTY_NAME (version $VERSION_ID, build $RASPIOS_BUILD_DATE)"
 
+      - name: Configure console UTF-8 defaults
+        run: |
+          cat <<'EOF' | sudo tee /mnt/raspios-root/tmp/console-setup.seed
+          console-setup console-setup/codeset select Lat15
+          console-setup console-setup/charmap select UTF-8
+          EOF
+
+          sudo chroot /mnt/raspios-root /bin/bash -c "
+            debconf-set-selections /tmp/console-setup.seed && \
+            DEBIAN_FRONTEND=noninteractive dpkg-reconfigure console-setup \
+          "
+
+          sudo rm /mnt/raspios-root/tmp/console-setup.seed
+
       - name: Create rootfs tarball
         run: |
           cd /mnt/raspios-root

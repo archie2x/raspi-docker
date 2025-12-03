@@ -11,6 +11,8 @@ published Raspberry Pi OS Lite arm64 image into container-friendly layers and pu
 - `ghcr.io/<owner>/raspios-build-box:*` – adds a small set of development tools
   (`build-essential`, `git`, `curl`, `cmake`, `pkg-config`, `python3`, etc.) on top of the dated base
   image so the toolchain always matches the underlying OS.
+- Each image runs `dpkg-reconfigure console-setup` during the build to make UTF-8 the default console
+  character set.
 
 You can change the default packages via the `BUILD_BOX_PACKAGES` environment entry in the workflow.
 
