@@ -175,13 +175,13 @@ jobs:
       - name: Build and push Raspberry Pi OS build-box image (arm64)
         run: |
           mkdir -p build-box-context
-          cat > build-box-context/Dockerfile <<'EOF'
-          ARG BASE_IMAGE
-          ARG BUILD_PACKAGES
-          FROM ${BASE_IMAGE}
+          cat > build-box-context/Dockerfile <<EOF
+          FROM ${BASE_IMAGE_DATE_REF}
 
           RUN apt-get update && \
-              DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ${BUILD_PACKAGES} && \
+              DEBIAN_FRONTEND=noninteractive \
+              apt-get install -y --no-install-recommends \
+              ${BUILD_BOX_PACKAGES} && \
               rm -rf /var/lib/apt/lists/*
 
           CMD ["/bin/bash"]
@@ -189,8 +189,6 @@ jobs:
 
           docker buildx build \
             --platform linux/arm64 \
-            --build-arg BASE_IMAGE="$BASE_IMAGE_DATE_REF" \
-            --build-arg BUILD_PACKAGES="$BUILD_BOX_PACKAGES" \
             -t "$BUILD_BOX_REPO:$IMAGE_TAG" \
             -t "$BUILD_BOX_REPO:$IMAGE_DATE_TAG" \
             --push \
