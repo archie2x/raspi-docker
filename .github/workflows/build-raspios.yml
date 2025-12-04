@@ -175,13 +175,14 @@ jobs:
       - name: Build and push Raspberry Pi OS build-box image (arm64)
         run: |
           mkdir -p build-box-context
+          PACKAGES=$(printf '%s' "$BUILD_BOX_PACKAGES" | tr '\n' ' ' | xargs)
+
           cat > build-box-context/Dockerfile <<EOF
           FROM ${BASE_IMAGE_DATE_REF}
 
           RUN apt-get update && \
               DEBIAN_FRONTEND=noninteractive \
-              apt-get install -y --no-install-recommends \
-              ${BUILD_BOX_PACKAGES} && \
+              apt-get install -y --no-install-recommends ${PACKAGES} && \
               rm -rf /var/lib/apt/lists/*
 
           CMD ["/bin/bash"]
