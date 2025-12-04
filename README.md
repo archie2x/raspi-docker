@@ -8,8 +8,8 @@ published Raspberry Pi OS Lite arm64 image into container-friendly layers and pu
 - `ghcr.io/<owner>/raspios:trixie-arm64` – a faithful reproduction of the upstream rootfs.
 - `ghcr.io/<owner>/raspios:trixie-arm64-YYYY-MM-DD` – the same filesystem, tagged with the
   release date that Raspberry Pi publishes (parsed from the resolved download URL).
-- `ghcr.io/<owner>/raspios-build-box:*` – adds a small set of development tools
-  (`build-essential`, `git`, `curl`, `cmake`, `pkg-config`, `python3`, etc.) on top of the dated base
+- `ghcr.io/<owner>/raspios-build-box:*` – adds a more capable development stack (`build-essential`,
+  SDL/GL/Vulkan headers, common codecs/libs, `git`, `curl`, `cmake`, Python, etc.) on top of the dated base
   image so the toolchain always matches the underlying OS.
 - Each image runs `dpkg-reconfigure console-setup` during the build to make UTF-8 the default console
   character set.
