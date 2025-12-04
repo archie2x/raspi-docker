@@ -111,6 +111,7 @@ jobs:
 
       - name: Remove initramfs-tools package
         run: |
+          sudo mkdir -p /mnt/raspios-root/boot/firmware
           sudo chroot /mnt/raspios-root /bin/bash -c "
             export DEBIAN_FRONTEND=noninteractive
             apt-get purge -y initramfs-tools && \
