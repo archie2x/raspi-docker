@@ -105,6 +105,18 @@ jobs:
 
           sudo rm /mnt/raspios-root/tmp/console-setup.seed
 
+      - name: Remove initramfs-tools package
+        run: |
+          sudo chroot /mnt/raspios-root /bin/bash -c "
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get purge -y initramfs-tools && \
+            apt-get autoremove -y && \
+            apt-get clean
+          "
+
+          sudo rm -rf /mnt/raspios-root/var/cache/apt/archives/*
+          echo "Purged initramfs-tools to slim container rootfs"
+
       - name: Create rootfs tarball
         run: |
           cd /mnt/raspios-root
