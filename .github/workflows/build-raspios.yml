@@ -116,11 +116,11 @@ jobs:
             export DEBIAN_FRONTEND=noninteractive
             apt-get purge -y initramfs-tools && \
             apt-get autoremove -y && \
-            apt-get clean
+            apt-get clean || true
           "
 
           sudo rm -rf /mnt/raspios-root/var/cache/apt/archives/*
-          echo "Purged initramfs-tools to slim container rootfs"
+          echo "Purged initramfs-tools to avoid update errors"
 
       - name: Create rootfs tarball
         run: |
