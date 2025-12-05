@@ -109,6 +109,13 @@ jobs:
 
           sudo rm /mnt/raspios-root/tmp/console-setup.seed
 
+      - name: Force HTTPS in apt sources.list.d entries
+        run: |
+          TARGET_DIR=/mnt/raspios-root/etc/apt/sources.list.d
+          if sudo test -d "$TARGET_DIR"; then
+            sudo find "$TARGET_DIR" -type f -name '*.list' -print -exec sudo sed -i 's|http://|https://|g' {} +
+          fi
+
       - name: Remove initramfs-tools package
         run: |
           sudo mkdir -p /mnt/raspios-root/boot/firmware
