@@ -15,6 +15,8 @@ published Raspberry Pi OS Lite arm64 image into container-friendly layers and pu
   `/boot/firmware` directory so package removal scripts run cleanly in the chrooted build.
 - Each image runs `dpkg-reconfigure console-setup` during the build to make UTF-8 the default console
   character set.
+- All apt sources are rewritten to HTTPS, and for every `deb` stanza an accompanying `deb-src` stanza
+  is added so source packages are always available.
 
 You can change the default packages via the `BUILD_BOX_PACKAGES` environment entry in the workflow.
 

@@ -111,18 +111,23 @@ jobs:
 
       - name: Force HTTPS and ensure deb-src entries
         run: |
-          APT_DIR=/mnt/raspios-root/etc/apt
+          sudo python3 <<'PY'
+          import pathlib
 
-          for LIST in "$APT_DIR"/sources.list "$APT_DIR"/sources.list.d/*.list; do
-            [ -f "$LIST" ] || continue
-            sudo sed -i 's|http://|https://|g' "$LIST"
-
-            while read -r entry; do
-              [ -n "$entry" ] || continue
-              deb_src=$(echo "$entry" | sed 's/^deb /deb-src /')
-              sudo grep -qxF "$deb_src" "$LIST" || echo "$deb_src" | sudo tee -a "$LIST" >/dev/null
-            done < <(grep -E '^\s*deb\s' "$LIST")
-          done
+          apt_dir = pathlib.Path("/mnt/raspios-root/etc/apt/sources.list.d")
+          for path in sorted(apt_dir.glob("*.sources")):
+            text = path.read_text()
+            text = text.replace("http://", "https://")
+            updated = []
+            for line in text.splitlines():
+              if line.startswith("Types:"):
+                tokens = line.split()
+                if "deb-src" not in tokens[1:]:
+                  tokens.append("deb-src")
+                line = " ".join(tokens)
+              updated.append(line)
+            path.write_text("\n".join(updated) + "\n")
+          PY
 
       - name: Remove initramfs-tools package
         run: |
