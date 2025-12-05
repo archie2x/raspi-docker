@@ -109,12 +109,20 @@ jobs:
 
           sudo rm /mnt/raspios-root/tmp/console-setup.seed
 
-      - name: Force HTTPS in apt sources.list.d entries
+      - name: Force HTTPS and ensure deb-src entries
         run: |
-          TARGET_DIR=/mnt/raspios-root/etc/apt/sources.list.d
-          if sudo test -d "$TARGET_DIR"; then
-            sudo find "$TARGET_DIR" -type f -name '*.list' -print -exec sudo sed -i 's|http://|https://|g' {} +
-          fi
+          APT_DIR=/mnt/raspios-root/etc/apt
+
+          for LIST in "$APT_DIR"/sources.list "$APT_DIR"/sources.list.d/*.list; do
+            [ -f "$LIST" ] || continue
+            sudo sed -i 's|http://|https://|g' "$LIST"
+
+            while read -r entry; do
+              [ -n "$entry" ] || continue
+              deb_src=$(echo "$entry" | sed 's/^deb /deb-src /')
+              sudo grep -qxF "$deb_src" "$LIST" || echo "$deb_src" | sudo tee -a "$LIST" >/dev/null
+            done < <(grep -E '^\s*deb\s' "$LIST")
+          done
 
       - name: Remove initramfs-tools package
         run: |
