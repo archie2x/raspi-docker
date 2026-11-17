@@ -21,6 +21,8 @@ jobs:
         build-essential libgl1-mesa-dev libglu1-mesa-dev libvulkan-dev
         libsdl2-dev libpng-dev libfreetype6-dev libsamplerate-dev libspeexdsp-dev
         libogg-dev libvorbis-dev zlib1g-dev git curl libcurl4-openssl-dev ca-certificates pkg-config
+        libharfbuzz-dev libicu-dev libavcodec-dev libavfilter-dev libavformat-dev libavutil-dev
+        libfreeimage-dev libgit2-dev libpugixml-dev libbluetooth-dev libpoppler-cpp-dev gettext
         cmake python3 python3-pip
       RPIOS_URL: https://downloads.raspberrypi.com/raspios_lite_arm64_latest
 

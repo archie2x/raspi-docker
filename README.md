@@ -11,6 +11,9 @@ published Raspberry Pi OS Lite arm64 image into container-friendly layers and pu
 - `ghcr.io/<owner>/raspios-build-box:*` – adds a more capable development stack (`build-essential`,
   SDL/GL/Vulkan headers, common codecs/libs, `git`, `curl`, `cmake`, Python, etc.) on top of the dated base
   image so the toolchain always matches the underlying OS.
+  It also includes the distro FFmpeg, font/text, FreeImage, libgit2, pugixml, BlueZ, and Poppler
+  development packages needed to build ES-DE. The image can be extracted as a sysroot for native
+  macOS cross-compilation; its Linux compilers do not need to be executed.
 - Both variants remove `initramfs-tools` (and the stock kernel) to slim the rootfs while creating the
   `/boot/firmware` directory so package removal scripts run cleanly in the chrooted build.
 - Each image runs `dpkg-reconfigure console-setup` during the build to make UTF-8 the default console
